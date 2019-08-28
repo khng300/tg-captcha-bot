@@ -93,8 +93,17 @@ func challengeUser(m *tb.Message) {
 	time.AfterFunc(30*time.Second, func() {
 		_, passed := passedUsers.Load(m.UserJoined.ID)
 		if !passed {
-			chatMember := tb.ChatMember{User: m.UserJoined, RestrictedUntil: tb.Forever()}
-			err := bot.Ban(m.Chat, &chatMember)
+			//
+			// The original bot will directly k+b the member out.
+			// We restrict the user until forever instead.
+			//
+			//chatMember := tb.ChatMember{User: m.UserJoined, RestrictedUntil: tb.Forever()}
+			//err := bot.Ban(m.Chat, &chatMember)
+			//if err != nil {
+			//	log.Println(err)
+			//}
+			chatMember := tb.ChatMember{User: m.UserJoined, RestrictedUntil: tb.Forever(), Rights: tb.NoRights()}
+			err := bot.Restrict(m.Chat, &chatMember)
 			if err != nil {
 				log.Println(err)
 			}
@@ -115,7 +124,8 @@ func challengeUser(m *tb.Message) {
 				}
 			}
 
-			log.Printf("User: %v was banned in chat: %v", m.UserJoined, m.Chat)
+			//log.Printf("User: %v was banned in chat: %v", m.UserJoined, m.Chat)
+			log.Printf("User: %v was permanently restricted in chat: %v", m.UserJoined, m.Chat)
 		}
 		passedUsers.Delete(m.UserJoined.ID)
 	})
